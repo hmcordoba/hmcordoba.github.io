@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Trivia de Planetas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      color: white;
+      font-family: sans-serif;
+      background: black;
+    }
+    canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2rem;
+      margin: 20px 0;
+    }
+    .question {
+      font-size: 1.3rem;
+      margin: 20px 0;
+    }
+    .btn {
+      border: 2px solid #ffffff22;
+      border-radius: 12px;
+      padding: 15px;
+      margin: 10px 0;
+      width: 100%;
+      font-size: 1rem;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.3s;
+      color: white;
+    }
+    .btn::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 0;
+    }
+    .btn span {
+      position: relative;
+      z-index: 1;
+    }
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 12px #ffffff55;
+      cursor: pointer;
+    }
+    .Mercurio { background-image: url('https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg'); }
+    .Venus { background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/e5/Venus-real_color.jpg'); }
+    .Tierra { background-image: url('https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg'); }
+    .Marte { background-image: url('https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg'); }
+    #result {
+      font-size: 1.2rem;
+      margin-top: 20px;
+      min-height: 1.5em;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<div class="container">
+  <h1>Trivia de Planetas</h1>
+  <div id="game">
+    <button class="btn" onclick="startGame()"><span>Comenzar</span></button>
+  </div>
+  <div id="result"></div>
+</div>
+
+<script>
+  // ANIMACIÓN DE ESTRELLAS optimizada para iPhone
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  let stars = [];
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  for (let i = 0; i < 150; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 2,
+      speed: Math.random() * 0.5 + 0.2
+    });
+  }
+
+  function animateStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
+    stars.forEach(star => {
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+      ctx.fill();
+      star.y += star.speed;
+      if (star.y > canvas.height) {
+        star.y = 0;
+        star.x = Math.random() * canvas.width;
+      }
+    });
+    requestAnimationFrame(animateStars);
+  }
+  animateStars();
+
+  // TRIVIA
+  const questions = [
+    { question: "¿Cuál es el planeta más cercano al Sol?", options: ["Venus", "Mercurio", "Tierra", "Marte"], answer: "Mercurio" },
+    { question: "¿Qué planeta es conocido como el planeta rojo?", options: ["Marte", "Venus", "Tierra", "Mercurio"], answer: "Marte" },
+    { question: "¿En qué planeta vivimos?", options: ["Venus", "Mercurio", "Tierra", "Marte"], answer: "Tierra" },
+    { question: "¿Cuál tiene la atmósfera más caliente?", options: ["Venus", "Tierra", "Marte", "Mercurio"], answer: "Venus" },
+    { question: "¿Qué planeta tiene días más largos que su año?", options: ["Venus", "Tierra", "Marte", "Mercurio"], answer: "Venus" }
+  ];
+
+  let currentQuestion = 0;
+  let score = 0;
+
+  function startGame() {
+    currentQuestion = 0;
+    score = 0;
+    showQuestion();
+    document.getElementById("result").innerText = "";
+  }
+
+  function showQuestion() {
+    if (currentQuestion >= questions.length) {
+      document.getElementById('game').innerHTML = `
+        <h2>¡Juego terminado!</h2>
+        <p>Puntaje: ${score}/${questions.length}</p>
+        <button class="btn" onclick="startGame()"><span>Jugar de nuevo</span></button>
+      `;
+      return;
+    }
+    const q = questions[currentQuestion];
+    let html = `<div class="question">${q.question}</div>`;
+    q.options.forEach(option => {
+      html += `<button class="btn ${option}" onclick="checkAnswer('${option}')"><span>${option}</span></button>`;
+    });
+    document.getElementById('game').innerHTML = html;
+  }
+
+  function checkAnswer(option) {
+    const correct = questions[currentQuestion].answer;
+    let message = "";
+    if (option === correct) {
+      message = "✅ ¡Correcto!";
+      score++;
+    } else {
+      message = "❌ Incorrecto. Era: " + correct;
+    }
+    document.getElementById("result").innerText = message;
+    currentQuestion++;
+    setTimeout(showQuestion, 800);
+  }
+</script>
+<p>Juego realizado por: Martina, Lautaro, Matilda, Giannina, Matheo y Zaira</p>
+
+</body>
+</html>
